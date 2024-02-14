@@ -9,14 +9,22 @@ export default function Home() {
   const [display, setDisplay] = useState<string>("0");
   const [memory, setMemory] = useState<number | null>(null);
   const [operator, setOperator] = useState<string | null>(null);
+  // =ボタンのstateを追加しました。
+  const [equalClicked, setEqualClicked] = useState<boolean>(false);
 
-  // 数字押された時のアクション
+  // 数字が押された時のアクション
   const handleNumberClick = (number: number) => {
-    if (display === "0") {
+    if (equalClicked) {
+      // 計算結果が表示されている場合は新しい数字が入力されたときにリセットする
       setDisplay(number.toString());
-      // 12桁以下か判定
-    } else if (display.length < 12) {
-      setDisplay(prevDisplay => prevDisplay + number.toString());
+      setEqualClicked(false);
+    } else {
+      if (display === "0") {
+        setDisplay(number.toString());
+        // 12桁以下か判定
+      } else if (display.length < 12) {
+        setDisplay(prevDisplay => prevDisplay + number.toString());
+      }
     }
   };
 
@@ -25,35 +33,36 @@ export default function Home() {
     setMemory(parseFloat(display));
     setOperator(operator);
     setDisplay("0");
+    setEqualClicked(false);
   };
 
   // ＝が押されたときのアクション
   const handleEqualClick = () => {
     if (memory !== null && operator !== null) {
-      let result: number;
-      switch (operator) {
-        case '+':
-          result = memory + parseFloat(display);
-          break;
-        case '-':
-          result = memory - parseFloat(display);
-          break;
-        case '*':
-          result = memory * parseFloat(display);
-          break;
-        case '/':
-          result = memory / parseFloat(display);
-          break;
-        default:
-          result = 0;
-      }
-      // 表示結果を12桁を上限にする
-      const resultString = result.toFixed(12);
-      setDisplay(resultString);
+      const result = (() => {
+        switch (operator) {
+          case '+':
+            return memory + parseFloat(display);
+          case '-':
+            return memory - parseFloat(display);
+          case '*':
+            return memory * parseFloat(display);
+          case '/':
+            return memory / parseFloat(display);
+          default:
+            return 0;
+        }
+      })();
+
+      const resultString = Number.isInteger(result) ? result.toString() : result.toFixed(12);
+
       setMemory(null);
       setOperator(null);
+      setDisplay(resultString);
+      setEqualClicked(true);
     }
   };
+
   return (
     <ChakraProvider>
       <Box border="solid" maxWidth="300px" height="450px" margin="0 auto">
@@ -68,21 +77,21 @@ export default function Home() {
           <GridItem colSpan={4} textAlign="right">
             {display}
           </GridItem>
-          <NumberBtn number={7} onClick={handleNumberClick} />
-          <NumberBtn number={8} onClick={handleNumberClick} />
-          <NumberBtn number={9} onClick={handleNumberClick} />
+          {[7, 8, 9].map((number) => (
+            <NumberBtn key={number} number={number} onClick={handleNumberClick} />
+          ))}
           <OperatorBtn operator="+" onClick={handleOperatorClick} />
-          <NumberBtn number={4} onClick={handleNumberClick} />
-          <NumberBtn number={5} onClick={handleNumberClick} />
-          <NumberBtn number={6} onClick={handleNumberClick} />
+          {[4, 5, 6].map((number) => (
+            <NumberBtn key={number} number={number} onClick={handleNumberClick} />
+          ))}
           <OperatorBtn operator="-" onClick={handleOperatorClick} />
-          <NumberBtn number={1} onClick={handleNumberClick} />
-          <NumberBtn number={2} onClick={handleNumberClick} />
-          <NumberBtn number={3} onClick={handleNumberClick} />
+          {[1, 2, 3].map((number) => (
+            <NumberBtn key={number} number={number} onClick={handleNumberClick} />
+          ))}
           <OperatorBtn operator="*" onClick={handleOperatorClick} />
           <NumberBtn number={0} onClick={handleNumberClick} />
           <Spacer />
-          <EqualBtn onClick={handleEqualClick} />
+          <EqualBtn onClick={handleEqualClick} disabled={equalClicked} />
           <OperatorBtn operator="/" onClick={handleOperatorClick} />
         </Grid>
       </Box>

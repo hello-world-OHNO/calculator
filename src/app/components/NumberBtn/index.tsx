@@ -6,7 +6,6 @@ interface NumberBtnProps {
   onClick: (number: number) => void;
 }
 
-// React.FCを使用せずに関数コンポーネントを定義
 const NumberBtn = ({ number, onClick }: NumberBtnProps) => {
   return (
     <Button onClick={() => onClick(number)}>

@@ -1,13 +1,9 @@
 import React from "react";
 import { Button } from "@chakra-ui/react";
 
-interface EqualBtnProps {
-  onClick: () => void;
-}
-
-const EqualBtn = ({ onClick }: EqualBtnProps) => {
+const EqualBtn = ({ onClick, disabled }: { onClick: () => void, disabled: boolean }) => {
   return (
-    <Button onClick={onClick} colorScheme="blue">
+    <Button onClick={onClick} colorScheme="blue" disabled={disabled}>
       =
     </Button>
   );

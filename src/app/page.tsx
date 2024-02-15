@@ -1,96 +1,115 @@
-import Image from "next/image";
-import styles from "./page.module.css";
-import { ChakraProvider } from "@chakra-ui/react";
+"use client";
+import { Box, ChakraProvider, Grid, GridItem, Spacer } from "@chakra-ui/react";
+import NumberBtn from "./components/NumberBtn/index";
+import OperatorBtn from "./components/OperatorBtn/index";
+import EqualBtn from "./components/EqualBtn/index";
+import { useState } from 'react';
 
 export default function Home() {
+  const [display, setDisplay] = useState<string>("0");
+  const [memory, setMemory] = useState<number | null>(null);
+  const [operator, setOperator] = useState<string | null>(null);
+  // =ボタンのstateを追加しました。
+  const [equalClicked, setEqualClicked] = useState<boolean>(false);
+
+  // 桁数上限
+  const limitDigits = 12;
+  // 電卓の数字
+  const calculatorNumber1 = 1
+  const calculatorNumber2 = 2
+  const calculatorNumber3 = 3
+  const calculatorNumber4 = 4
+  const calculatorNumber5 = 5
+  const calculatorNumber6 = 6
+  const calculatorNumber7 = 7
+  const calculatorNumber8 = 8
+  const calculatorNumber9 = 9
+  const calculatorNumber0 = 0
+
+  // 数字が押された時のアクション
+  const handleNumberClick = (number: number) => {
+    if (equalClicked) {
+      // 計算結果が表示されている場合は新しい数字が入力されたときにリセットする
+      setDisplay(number.toString());
+      setEqualClicked(false);
+      return;
+    }
+    if (display === "0") {
+      setDisplay(number.toString());
+      return;
+      // 12桁以下か判定
+    } else if (display.length < limitDigits) {
+      setDisplay(prevDisplay => prevDisplay + number.toString());
+    }
+  };
+
+  // 四則演算が押された時のアクション
+  const handleOperatorClick = (operator: string) => {
+    setMemory(parseFloat(display));
+    setOperator(operator);
+    setDisplay("0");
+    setEqualClicked(false);
+  };
+
+  // ＝ボタンが押されたときのアクション
+  const handleEqualClick = () => {
+    if (memory === null || operator === null) {
+      return;
+    }
+    const result = (() => {
+      switch (operator) {
+        case '+':
+          return memory + parseFloat(display);
+        case '-':
+          return memory - parseFloat(display);
+        case '*':
+          return memory * parseFloat(display);
+        case '/':
+          return memory / parseFloat(display);
+        default:
+          return 0;
+      }
+    })();
+    const resultString = Number.isInteger(result) ? result.toString() : result.toFixed(limitDigits);
+
+    setMemory(null);
+    setOperator(null);
+    setDisplay(resultString);
+    setEqualClicked(true);
+  };
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
+    <ChakraProvider>
+      <Box border="solid" maxWidth="300px" height="450px" margin="0 auto">
+        <Grid
+          templateColumns="repeat(4, 1fr)"
+          gap={2}
+          height="100%"
+          alignItems="center"
+          justifyContent="center"
+          padding={4}
         >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+          <GridItem colSpan={4} textAlign="right">
+            {display}
+          </GridItem>
+          {[calculatorNumber7, calculatorNumber8, calculatorNumber9].map((number) => (
+            <NumberBtn key={number} number={number} onClick={handleNumberClick} />
+          ))}
+          <OperatorBtn operator="+" onClick={handleOperatorClick} />
+          {[calculatorNumber4, calculatorNumber5, calculatorNumber6].map((number) => (
+            <NumberBtn key={number} number={number} onClick={handleNumberClick} />
+          ))}
+          <OperatorBtn operator="-" onClick={handleOperatorClick} />
+          {[calculatorNumber1, calculatorNumber2, calculatorNumber3].map((number) => (
+            <NumberBtn key={number} number={number} onClick={handleNumberClick} />
+          ))}
+          <OperatorBtn operator="*" onClick={handleOperatorClick} />
+          <NumberBtn number={calculatorNumber0} onClick={handleNumberClick} />
+          <Spacer />
+          <EqualBtn onClick={handleEqualClick} disabled={equalClicked} />
+          <OperatorBtn operator="/" onClick={handleOperatorClick} />
+        </Grid>
+      </Box>
+    </ChakraProvider>
   );
 }

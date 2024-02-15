@@ -12,19 +12,34 @@ export default function Home() {
   // =ボタンのstateを追加しました。
   const [equalClicked, setEqualClicked] = useState<boolean>(false);
 
+  // 桁数上限
+  const limitDigits = 12;
+  // 電卓の数字
+  const calculatorNumber1 = 1
+  const calculatorNumber2 = 2
+  const calculatorNumber3 = 3
+  const calculatorNumber4 = 4
+  const calculatorNumber5 = 5
+  const calculatorNumber6 = 6
+  const calculatorNumber7 = 7
+  const calculatorNumber8 = 8
+  const calculatorNumber9 = 9
+  const calculatorNumber0 = 0
+
   // 数字が押された時のアクション
   const handleNumberClick = (number: number) => {
     if (equalClicked) {
       // 計算結果が表示されている場合は新しい数字が入力されたときにリセットする
       setDisplay(number.toString());
       setEqualClicked(false);
-    } else {
-      if (display === "0") {
-        setDisplay(number.toString());
-        // 12桁以下か判定
-      } else if (display.length < 12) {
-        setDisplay(prevDisplay => prevDisplay + number.toString());
-      }
+      return;
+    }
+    if (display === "0") {
+      setDisplay(number.toString());
+      return;
+      // 12桁以下か判定
+    } else if (display.length < limitDigits) {
+      setDisplay(prevDisplay => prevDisplay + number.toString());
     }
   };
 
@@ -36,31 +51,31 @@ export default function Home() {
     setEqualClicked(false);
   };
 
-  // ＝が押されたときのアクション
+  // ＝ボタンが押されたときのアクション
   const handleEqualClick = () => {
-    if (memory !== null && operator !== null) {
-      const result = (() => {
-        switch (operator) {
-          case '+':
-            return memory + parseFloat(display);
-          case '-':
-            return memory - parseFloat(display);
-          case '*':
-            return memory * parseFloat(display);
-          case '/':
-            return memory / parseFloat(display);
-          default:
-            return 0;
-        }
-      })();
-
-      const resultString = Number.isInteger(result) ? result.toString() : result.toFixed(12);
-
-      setMemory(null);
-      setOperator(null);
-      setDisplay(resultString);
-      setEqualClicked(true);
+    if (memory === null || operator === null) {
+      return;
     }
+    const result = (() => {
+      switch (operator) {
+        case '+':
+          return memory + parseFloat(display);
+        case '-':
+          return memory - parseFloat(display);
+        case '*':
+          return memory * parseFloat(display);
+        case '/':
+          return memory / parseFloat(display);
+        default:
+          return 0;
+      }
+    })();
+    const resultString = Number.isInteger(result) ? result.toString() : result.toFixed(limitDigits);
+
+    setMemory(null);
+    setOperator(null);
+    setDisplay(resultString);
+    setEqualClicked(true);
   };
 
   return (
@@ -77,19 +92,19 @@ export default function Home() {
           <GridItem colSpan={4} textAlign="right">
             {display}
           </GridItem>
-          {[7, 8, 9].map((number) => (
+          {[calculatorNumber7, calculatorNumber8, calculatorNumber9].map((number) => (
             <NumberBtn key={number} number={number} onClick={handleNumberClick} />
           ))}
           <OperatorBtn operator="+" onClick={handleOperatorClick} />
-          {[4, 5, 6].map((number) => (
+          {[calculatorNumber4, calculatorNumber5, calculatorNumber6].map((number) => (
             <NumberBtn key={number} number={number} onClick={handleNumberClick} />
           ))}
           <OperatorBtn operator="-" onClick={handleOperatorClick} />
-          {[1, 2, 3].map((number) => (
+          {[calculatorNumber1, calculatorNumber2, calculatorNumber3].map((number) => (
             <NumberBtn key={number} number={number} onClick={handleNumberClick} />
           ))}
           <OperatorBtn operator="*" onClick={handleOperatorClick} />
-          <NumberBtn number={0} onClick={handleNumberClick} />
+          <NumberBtn number={calculatorNumber0} onClick={handleNumberClick} />
           <Spacer />
           <EqualBtn onClick={handleEqualClick} disabled={equalClicked} />
           <OperatorBtn operator="/" onClick={handleOperatorClick} />
